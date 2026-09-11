@@ -246,7 +246,7 @@ public class BestiaryWindow : Window, IDisposable
         using (Wrapped(left, width))
         {
             ImGui.TextUnformatted(!CaptureState.Ready
-                ? "Log in and open the bestiary once so the game sends the list."
+                ? "Waiting on the game for the list; open the bestiary once if it never arrives."
                 : captured == BeastTable.Total
                     ? "All fifty captured."
                     : missing == 0

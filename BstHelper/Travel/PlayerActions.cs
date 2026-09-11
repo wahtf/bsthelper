@@ -91,6 +91,18 @@ public static unsafe class PlayerActions
         return Sprint();
     }
 
+    public static bool InWorld
+        => Plugin.ClientState.IsLoggedIn && Plugin.ObjectTable.LocalPlayer != null;
+
+    public static bool Zoning
+        => Plugin.Condition[ConditionFlag.BetweenAreas] || Plugin.Condition[ConditionFlag.BetweenAreas51];
+
+    public static bool InEvent
+        => Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
+           Plugin.Condition[ConditionFlag.WatchingCutscene78] ||
+           Plugin.Condition[ConditionFlag.OccupiedInEvent] ||
+           Plugin.Condition[ConditionFlag.Occupied];
+
     public static bool IsBusyWithAnimation()
         => Plugin.Condition[ConditionFlag.Mounting] || Plugin.Condition[ConditionFlag.Mounting71] ||
            Plugin.Condition[ConditionFlag.Jumping] || Plugin.Condition[ConditionFlag.Jumping61] ||

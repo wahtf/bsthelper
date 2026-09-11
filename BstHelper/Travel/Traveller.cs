@@ -753,8 +753,7 @@ public class Traveller
             dispatched = false;
         }
 
-        if (Plugin.Condition[ConditionFlag.BetweenAreas] || Plugin.Condition[ConditionFlag.BetweenAreas51] ||
-            Plugin.ObjectTable[0] == null)
+        if (PlayerActions.Zoning || Plugin.ObjectTable[0] == null)
         {
             settleUntil = DateTime.Now.Add(ArrivalSettle);
             dispatched = false;

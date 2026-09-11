@@ -85,9 +85,7 @@ public static class GameData
 
     public static unsafe void RefreshAetheryteList()
     {
-        if (AetheryteListLoaded || !Plugin.ClientState.IsLoggedIn ||
-            Plugin.ObjectTable.LocalPlayer == null ||
-            Plugin.Condition[ConditionFlag.BetweenAreas] || Plugin.Condition[ConditionFlag.BetweenAreas51])
+        if (AetheryteListLoaded || !PlayerActions.InWorld || PlayerActions.Zoning)
             return;
 
         if (!Throttle.Ready("wahtools.telepo.refresh", 2000))

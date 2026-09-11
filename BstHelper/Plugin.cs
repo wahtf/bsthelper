@@ -24,6 +24,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IObjectTable ObjectTable { get; private set; } = null!;
     [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
     [PluginService] internal static IAetheryteList AetheryteList { get; private set; } = null!;
+    [PluginService] internal static IAddonLifecycle AddonLifecycle { get; private set; } = null!;
 
     internal static Configuration Configuration { get; private set; } = null!;
 
@@ -41,6 +42,7 @@ public sealed class Plugin : IDalamudPlugin
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 
         IpcHub.Init();
+        CaptureSync.Init();
 
         bestiaryWindow = new BestiaryWindow(this);
         trailOverlay = new TrailOverlay(this, bestiaryWindow);
@@ -69,6 +71,7 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleMainUi;
 
+        CaptureSync.Dispose();
         Trip.Stop("Plugin unloading");
         WindowSystem.RemoveAllWindows();
         bestiaryWindow.Dispose();
@@ -78,7 +81,11 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(CommandAlias);
     }
 
-    private void OnUpdate(IFramework framework) => Trip.Update();
+    private void OnUpdate(IFramework framework)
+    {
+        CaptureSync.Update();
+        Trip.Update();
+    }
 
     public void ToggleMainUi() => bestiaryWindow.Toggle();
 

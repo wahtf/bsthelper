@@ -4,14 +4,16 @@ namespace BstHelper.Bestiary;
 
 public static unsafe class CaptureState
 {
-    public static bool Ready
+    internal static XBMManager.DataState State
     {
         get
         {
             var manager = XBMManager.Instance();
-            return manager != null && manager->State == XBMManager.DataState.Received;
+            return manager == null ? XBMManager.DataState.None : manager->State;
         }
     }
+
+    public static bool Ready => State == XBMManager.DataState.Received;
 
     public static bool IsCaptured(uint number)
     {
