@@ -91,6 +91,17 @@ public sealed class BeastTrip
 
     public void Update()
     {
+        if (State is ETrip.Arrived or ETrip.Failed)
+        {
+            if (Target is not { } done || !Plugin.ClientState.IsLoggedIn ||
+                (done.IsOverworld && Plugin.ClientState.TerritoryType != done.Territory))
+            {
+                Stop("Left the zone");
+            }
+
+            return;
+        }
+
         if (State != ETrip.Travelling)
             return;
 

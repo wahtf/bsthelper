@@ -292,7 +292,7 @@ public class BestiaryWindow : Window, IDisposable
             }
         }
 
-        if (mine && trip.State != ETrip.Idle)
+        if (mine && trip.State is ETrip.Travelling or ETrip.Failed)
         {
             using (ImRaii.PushColor(ImGuiCol.Text, trip.State == ETrip.Failed ? Locked : InkFaint))
             using (Wrapped(left, width))
