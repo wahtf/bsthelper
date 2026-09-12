@@ -20,7 +20,12 @@ public sealed class BeastTrip
 
     private readonly Traveller travel = new();
 
+    private uint territory;
+    private string label = "";
+
     public Beast? Target { get; private set; }
+
+    public Landmark? Spot { get; private set; }
 
     public ETrip State { get; private set; } = ETrip.Idle;
 
@@ -33,6 +38,13 @@ public sealed class BeastTrip
         if (!beast.IsOverworld)
             return $"{beast.Mob} is a {beast.DutyRole} in {beast.Duty}.";
 
+        return Blocker(beast.Territory, beast.Zone);
+    }
+
+    public static string? Blocker(Landmark spot) => Blocker(spot.Territory, spot.Zone);
+
+    private static string? Blocker(uint territoryId, string zone)
+    {
         var missing = Dependencies.Missing(Dependencies.Lifestream, Dependencies.Navmesh);
         if (missing.Count > 0)
             return $"{string.Join(" and ", missing)} {(missing.Count == 1 ? "is" : "are")} not loaded.";
@@ -41,8 +53,8 @@ public sealed class BeastTrip
             return "Not logged in.";
 
         GameData.RefreshAetheryteList();
-        if (GameData.AetheryteListLoaded && !Traveller.CanReach(beast.Territory))
-            return $"No attuned aetheryte in {beast.Zone}; attune there first.";
+        if (GameData.AetheryteListLoaded && !Traveller.CanReach(territoryId))
+            return $"No attuned aetheryte in {zone}; attune there first.";
 
         return null;
     }
@@ -51,9 +63,13 @@ public sealed class BeastTrip
     {
         Stop("Starting a new trip");
 
+        Target = beast;
+        Spot = null;
+        territory = beast.Territory;
+        label = $"the {beast.Mob} spot";
+
         if (Blocker(beast) is { } blocker)
         {
-            Target = beast;
             State = ETrip.Failed;
             Status = blocker;
             Plugin.ChatGui.PrintError($"[BstHelper] {blocker}");
@@ -63,19 +79,43 @@ public sealed class BeastTrip
         var destination = beast.World;
         if (destination == Vector3.Zero)
         {
-            Target = beast;
             State = ETrip.Failed;
             Status = $"No coordinates for {beast.Name}.";
             return false;
         }
 
-        Target = beast;
         travel.AllowZoneTeleport = true;
         travel.Go(beast.Territory, destination, StopRange, $"{beast.Mob} in {beast.Zone}", ProbeRadius);
 
         State = ETrip.Travelling;
         Status = $"Heading to {beast.Mob} in {beast.Where}";
         Plugin.ChatGui.Print($"[BstHelper] No. {beast.Number} {beast.Name}: {Status}.");
+        return true;
+    }
+
+    public bool Start(Landmark spot)
+    {
+        Stop("Starting a new trip");
+
+        Target = null;
+        Spot = spot;
+        territory = spot.Territory;
+        label = spot.Name;
+
+        if (Blocker(spot) is { } blocker)
+        {
+            State = ETrip.Failed;
+            Status = blocker;
+            Plugin.ChatGui.PrintError($"[BstHelper] {blocker}");
+            return false;
+        }
+
+        travel.AllowZoneTeleport = true;
+        travel.Go(spot.Territory, spot.World, StopRange, $"{spot.Name} in {spot.Zone}", ProbeRadius);
+
+        State = ETrip.Travelling;
+        Status = $"Heading to {spot.Name} in {spot.Zone}";
+        Plugin.ChatGui.Print($"[BstHelper] {Status}.");
         return true;
     }
 
@@ -93,8 +133,8 @@ public sealed class BeastTrip
     {
         if (State is ETrip.Arrived or ETrip.Failed)
         {
-            if (Target is not { } done || !Plugin.ClientState.IsLoggedIn ||
-                (done.IsOverworld && Plugin.ClientState.TerritoryType != done.Territory))
+            if ((Target == null && Spot == null) || !Plugin.ClientState.IsLoggedIn ||
+                (territory != 0 && Plugin.ClientState.TerritoryType != territory))
             {
                 Stop("Left the zone");
             }
@@ -105,7 +145,7 @@ public sealed class BeastTrip
         if (State != ETrip.Travelling)
             return;
 
-        if (Target is not { } beast)
+        if (Target == null && Spot == null)
         {
             Stop("No target");
             return;
@@ -116,7 +156,9 @@ public sealed class BeastTrip
             case ETravel.Arrived:
                 travel.Stop();
                 State = ETrip.Arrived;
-                Status = Sighted(beast) ? $"Arrived; {beast.Mob} is in sight" : $"Arrived at the {beast.Mob} spot";
+                Status = Target is { } beast && Sighted(beast)
+                    ? $"Arrived; {beast.Mob} is in sight"
+                    : $"Arrived at {label}";
                 Plugin.ChatGui.Print($"[BstHelper] {Status}.");
                 break;
 

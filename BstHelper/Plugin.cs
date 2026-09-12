@@ -87,7 +87,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private void DrawUi()
     {
-        if (PlayerActions.InCutscene)
+        if (!ClientState.IsLoggedIn || PlayerActions.Zoning || PlayerActions.InCutscene)
             return;
 
         WindowSystem.Draw();

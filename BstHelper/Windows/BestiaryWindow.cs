@@ -98,6 +98,9 @@ public class BestiaryWindow : Window, IDisposable
         }
 
         ImGui.Spacing();
+        DrawCrucible(scale, left, width);
+
+        ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
 
@@ -110,6 +113,44 @@ public class BestiaryWindow : Window, IDisposable
         }
 
         DrawSelected(BeastTable.ByNumber(selected), scale, left, width);
+    }
+
+    private void DrawCrucible(float scale, float left, float width)
+    {
+        var trip = plugin.Trip;
+        var spot = Landmarks.Crucible;
+        var mine = trip.Spot == spot;
+
+        if (mine && trip.IsRunning)
+        {
+            if (ImGui.Button("Stop##crucible", new Vector2(90 * scale, 0)))
+                trip.Stop("Asked to stop");
+        }
+        else
+        {
+            var blocker = BeastTrip.Blocker(spot);
+            using (ImRaii.Disabled(blocker != null))
+            {
+                if (ImGui.Button("Crucible", new Vector2(90 * scale, 0)))
+                    trip.Start(spot);
+            }
+
+            if (blocker != null)
+            {
+                using (ImRaii.PushColor(ImGuiCol.Text, InkFaint))
+                using (Wrapped(left, width))
+                    ImGui.TextUnformatted(blocker);
+
+                return;
+            }
+        }
+
+        if (mine && trip.State is not ETrip.Idle)
+        {
+            using (ImRaii.PushColor(ImGuiCol.Text, trip.State == ETrip.Failed ? Locked : InkFaint))
+            using (Wrapped(left, width))
+                ImGui.TextUnformatted(trip.Status);
+        }
     }
 
     private void DrawPageBar(float scale, float width)
