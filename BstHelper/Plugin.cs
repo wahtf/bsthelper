@@ -61,7 +61,7 @@ public sealed class Plugin : IDalamudPlugin
             HelpMessage = "Alias of /bst.",
         });
 
-        PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
+        PluginInterface.UiBuilder.Draw += DrawUi;
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUi;
         PluginInterface.UiBuilder.OpenConfigUi += ToggleMainUi;
         Framework.Update += OnUpdate;
@@ -70,7 +70,7 @@ public sealed class Plugin : IDalamudPlugin
     public void Dispose()
     {
         Framework.Update -= OnUpdate;
-        PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
+        PluginInterface.UiBuilder.Draw -= DrawUi;
         PluginInterface.UiBuilder.OpenMainUi -= ToggleMainUi;
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleMainUi;
 
@@ -83,6 +83,14 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.RemoveHandler(CommandName);
         CommandManager.RemoveHandler(CommandAlias);
+    }
+
+    private void DrawUi()
+    {
+        if (PlayerActions.InCutscene)
+            return;
+
+        WindowSystem.Draw();
     }
 
     private void OnUpdate(IFramework framework)

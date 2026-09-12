@@ -97,6 +97,11 @@ public static unsafe class PlayerActions
     public static bool Zoning
         => Plugin.Condition[ConditionFlag.BetweenAreas] || Plugin.Condition[ConditionFlag.BetweenAreas51];
 
+    public static bool InCutscene
+        => Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
+           Plugin.Condition[ConditionFlag.WatchingCutscene] ||
+           Plugin.Condition[ConditionFlag.WatchingCutscene78];
+
     public static bool InEvent
         => Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
            Plugin.Condition[ConditionFlag.WatchingCutscene78] ||
