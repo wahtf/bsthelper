@@ -36,6 +36,7 @@ public sealed class Plugin : IDalamudPlugin
 
     private readonly BestiaryWindow bestiaryWindow;
     private readonly TrailOverlay trailOverlay;
+    private readonly DebugWindow debugWindow;
 
     public Plugin()
     {
@@ -46,12 +47,14 @@ public sealed class Plugin : IDalamudPlugin
 
         bestiaryWindow = new BestiaryWindow(this);
         trailOverlay = new TrailOverlay(this, bestiaryWindow);
+        debugWindow = new DebugWindow();
         WindowSystem.AddWindow(bestiaryWindow);
         WindowSystem.AddWindow(trailOverlay);
+        WindowSystem.AddWindow(debugWindow);
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "Open the bestiary. \"/bst <number|name>\" travels to that beast, \"/bst stop\" cancels.",
+            HelpMessage = "Open the bestiary. \"/bst <number|name>\" travels to that beast, \"/bst stop\" cancels",
         });
         CommandManager.AddHandler(CommandAlias, new CommandInfo(OnCommand)
         {
@@ -76,6 +79,7 @@ public sealed class Plugin : IDalamudPlugin
         WindowSystem.RemoveAllWindows();
         bestiaryWindow.Dispose();
         trailOverlay.Dispose();
+        debugWindow.Dispose();
 
         CommandManager.RemoveHandler(CommandName);
         CommandManager.RemoveHandler(CommandAlias);
@@ -96,6 +100,12 @@ public sealed class Plugin : IDalamudPlugin
         if (argument.Length == 0)
         {
             ToggleMainUi();
+            return;
+        }
+
+        if (argument.Equals("debug", System.StringComparison.OrdinalIgnoreCase))
+        {
+            debugWindow.Toggle();
             return;
         }
 

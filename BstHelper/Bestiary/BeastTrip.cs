@@ -65,7 +65,7 @@ public sealed class BeastTrip
         {
             Target = beast;
             State = ETrip.Failed;
-            Status = $"No map data for {beast.Zone}.";
+            Status = $"No coordinates for {beast.Name}.";
             return false;
         }
 

@@ -10,8 +10,9 @@ public sealed record Beast(
     int Level,
     uint Territory,
     string Zone,
-    float MapX,
-    float MapY,
+    float X,
+    float Y,
+    float Z,
     string Duty = "",
     string DutyRole = "",
     string Note = "")
@@ -20,7 +21,7 @@ public sealed record Beast(
 
     public bool IsOverworld => Territory != 0;
 
-    public string Where => IsOverworld ? $"{Zone} ({MapX:0.#}, {MapY:0.#})" : Duty;
+    public string Where => IsOverworld ? Zone : Duty;
 
     public string Summary
     {
@@ -34,7 +35,7 @@ public sealed record Beast(
         }
     }
 
-    public Vector3 World => MapCoords.ToWorld(Territory, MapX, MapY);
+    public Vector3 World => new(X, Y, Z);
 
     public string Label => $"No. {Number}";
 

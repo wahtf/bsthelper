@@ -28,15 +28,15 @@ public static class MapCoords
         return MapsByTerritory.TryGetValue(territory, out var found) ? found : null;
     }
 
-    public static Vector3 ToWorld(uint territory, float mapX, float mapY)
+    public static Vector2 ToMap(uint territory, Vector3 world)
     {
         if (For(territory) is not { } map)
-            return Vector3.Zero;
+            return Vector2.Zero;
 
         var scale = map.SizeFactor / 100f;
-        return new Vector3(Axis(mapX, scale, map.OffsetX), 0f, Axis(mapY, scale, map.OffsetY));
+        return new Vector2(Coord(world.X, scale, map.OffsetX), Coord(world.Z, scale, map.OffsetY));
     }
 
-    private static float Axis(float mapCoord, float scale, float offset)
-        => ((((mapCoord - 1f) * scale / 41f) * 2048f) - 1024f) / scale - offset;
+    private static float Coord(float world, float scale, float offset)
+        => 1f + (41f * (((world + offset) * scale) + 1024f) / (2048f * scale));
 }
